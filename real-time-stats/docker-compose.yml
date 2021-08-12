@@ -8,8 +8,6 @@ services:
       - "3000:3000"
     volumes:
       - ./backend/index.js:/app/index.js
-      - ./backend/package.json:/app/package.json
-      - ./backend/package-lock.json:/app/package-lock.json
 #  frontend:
 #    build: frontend
 #    networks:
