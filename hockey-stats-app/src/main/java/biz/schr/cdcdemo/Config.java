@@ -15,7 +15,7 @@ public class Config {
     public static final int dbPort = 3306;
     public static final String dbURL = "jdbc:mysql://" + dbIP + ":" + dbPort + "/" + dbName;
 
-    public static final boolean USE_CLOUD = false;
+    public static final boolean USE_CLOUD = true;
 
     public static ClientConfig newClientConfig() {
         if (USE_CLOUD) {
