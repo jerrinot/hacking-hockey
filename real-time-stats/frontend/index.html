@@ -135,9 +135,12 @@
 
                 top5Data.sort((a, b) => {
                     if(a.goal === b.goal){
-                        if (a.player > b.player) {
+                        const upperA = a.player.toUpperCase();
+                        const upperB = b.player.toUpperCase();
+
+                        if (upperA > upperB) {
                             return 1;
-                        } else if (a.player < b.player){
+                        } else if (upperA < upperB){
                             return -1;
                         } else {
                             return 0;
@@ -154,7 +157,7 @@
         }
     });
 
-    const websocketURL = 'ws://localhost:3000';
+    const websocketURL = 'ws://3.69.177.18:3000/';
 
     const socket = new WebSocket(websocketURL, 'stats-protocol');
 
