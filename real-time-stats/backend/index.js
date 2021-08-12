@@ -48,6 +48,7 @@ function originIsAllowed(origin) {
                 console.log((new Date()) + ' Connection accepted.');
 
                 connections.add(connection);
+                console.log(connections.size);
                 // send cached data if there is
                 if(top5Cache) connection.send(JSON.stringify(top5Cache));
 
@@ -59,13 +60,17 @@ function originIsAllowed(origin) {
             } catch (e) {
                 console.log((new Date()) + ' Cannot accept connection ' + e);
             }
-
-
         });
 
         client = await Client.newHazelcastClient({
+            clusterName: 'bu-1077',
             network: {
-                clusterMembers: ['output-generator:5701']
+                hazelcastCloud: {
+                    discoveryToken: '3bg2qLtBtlbGuGE5RRwjZYi62W9fg9C7rdfG6nFWE1UMPSrqoP'
+                }
+            },
+            properties: {
+                'hazelcast.client.cloud.url': 'https://bumblebee.test.hazelcast.cloud/'
             }
         });
         const map = await client.getMap('top_5_map');
