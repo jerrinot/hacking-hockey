@@ -1,25 +1,109 @@
 <!doctype html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Real time stats</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+
+    <!-- Load required Bootstrap and BootstrapVue CSS -->
+    <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap@5.1.0/dist/css/bootstrap.min.css"/>
+    <link type="text/css" rel="stylesheet" href="//unpkg.com/bootstrap-vue@2.21.2/dist/bootstrap-vue.min.css"/>
+
+    <!-- Load polyfills to support older browsers -->
+    <script src="//polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"
+            crossorigin="anonymous"></script>
+
+    <!-- Load Vue followed by BootstrapVue -->
+    <script src="//unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="//unpkg.com/bootstrap-vue@2.21.2/dist/bootstrap-vue.min.js"></script>
+
+    <!-- Load the following for BootstrapVueIcons support -->
+    <script src="//unpkg.com/bootstrap-vue@2.21.2/dist/bootstrap-vue-icons.min.js"></script>
+
 </head>
 <body>
 
 <div id="app">
-    {{ message }}
+    <b-container>
+        <b-row style="text-align: center;">
+            <p style="font-size: 2em;">Real time stats</p>
+        </b-row>
+        <b-row>
+            <b-tabs content-class="mt-3">
+                <b-tab title="Top Scorers" active>
+                    <b-table
+                            :sort-by.sync="topScorers.sortBy"
+                            :sort-desc.sync="topScorers.sortDesc"
+                            :fields="topScorers.fields"
+                            :items="topScorers.values"
+                            striped
+                            hover
+                            label-sort-asc=''
+                            label-sort-desc=''
+                    >
+                        <template #cell(player)="row">
+                            <p>
+                                <b-icon-arrow-down-square v-if="calculateChange(row.item.player, row.item.goal) === 'down'"></b-icon-arrow-down-square>
+                                <b-icon-arrow-up-square v-if="calculateChange(row.item.player, row.item.goal) === 'up'"></b-icon-arrow-up-square>
+                                <b-icon-arrow-right-square v-if="calculateChange(row.item.player, row.item.goal) === 'same'"></b-icon-arrow-right-square>
+                                 {{row.item.player}}
+                            </p>
+                        </template>
+                    </b-table>
+                </b-tab>
+            </b-tabs>
+        </b-row>
+    </b-container>
 </div>
 
 <script>
-    var app = new Vue({
+    new Vue({
         el: '#app',
         data: {
-            message: 'Hello Vue!'
+            receivedInitialData: false,
+            topScorers: {
+                fields: [{ key: 'player', sortable: true }, { key: 'goal', sortable: true }],
+                sortDesc: true,
+                sortBy: 'goal',
+                values: [
+                    {
+                        player: 'AA', goal: 1
+                    }, {
+                        player: 'AB', goal: 52
+                    }, {
+                        player: 'C', goal: 333
+                    }
+                ]
+            },
+            // player to goal number to compute the change
+            lastTopScorers: {
+            }
+        },
+        methods: {
+            // returns up, if a player went up, 'down' if went down, '' initially,  'same' if it is same
+            calculateChange(player, goal){
+                if(!this.receivedInitialData) return '';
+
+                var oldGoal = this.lastTopScorers[player];
+                
+                // new player, return up
+                if(!oldGoal) return 'up';
+                
+                console.log(oldGoal, goal)
+                
+                if(oldGoal === goal){
+                    return 'same';
+                } else if(oldGoal > goal){
+                    return 'down';
+                } else if (oldGoal < goal){
+                    return 'up';
+                } else {
+                    // should not be here but if so return '' for no-op
+                    return '';
+                }
+            }
         }
     });
 </script>

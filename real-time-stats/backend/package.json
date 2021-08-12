@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "start-dev": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "hazelcast-client": "^4.2.0",
     "websocket": "^1.0.34"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
   }
 }
