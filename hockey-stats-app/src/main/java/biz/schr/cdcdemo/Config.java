@@ -21,9 +21,9 @@ public class Config {
         if (USE_CLOUD) {
             ClientConfig config = new ClientConfig();
             config.setProperty(STATISTICS_ENABLED.getName(), "true");
-            config.setProperty(HAZELCAST_CLOUD_DISCOVERY_TOKEN.getName(), "gA6VBZaa7u2w5967oWK0uPFIXpf6t3s2kgmUiANib8xrQglpv9");
-            config.setProperty("hazelcast.client.cloud.url", "https://dev.test.hazelcast.cloud");
-            config.setClusterName("de-1818");
+            config.setProperty(HAZELCAST_CLOUD_DISCOVERY_TOKEN.getName(), "3bg2qLtBtlbGuGE5RRwjZYi62W9fg9C7rdfG6nFWE1UMPSrqoP");
+            config.setProperty("hazelcast.client.cloud.url", "https://bumblebee.test.hazelcast.cloud");
+            config.setClusterName("bu-1077");
             return config;
         } else {
             return new ClientConfig();
