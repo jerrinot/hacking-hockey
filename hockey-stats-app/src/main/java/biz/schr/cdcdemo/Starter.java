@@ -4,20 +4,23 @@ import biz.schr.cdcdemo.dto.Player;
 import biz.schr.cdcdemo.loader.PlayerMapLoader;
 import biz.schr.cdcdemo.loader.RosterMapLoader;
 import biz.schr.cdcdemo.util.Constants;
-import com.hazelcast.config.Config;
+import com.hazelcast.client.HazelcastClient;
 import com.hazelcast.config.IndexConfig;
 import com.hazelcast.config.IndexType;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.config.MapStoreConfig;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
+
+import static com.hazelcast.config.MapStoreConfig.InitialLoadMode.EAGER;
 
 public class Starter {
 
     public static void main(String[] args) {
 
         // Start Jet cluster member
-        HazelcastInstance hz = Hazelcast.newHazelcastInstance(configureHazelcast());
+        HazelcastInstance hz = HazelcastClient.newHazelcastClient();
+        submitMapConfigs(hz);
 
         // Trigger loaders to eagerly populate lookup tables from the database
         preloadLookupCaches(hz);
@@ -30,30 +33,24 @@ public class Starter {
 
     }
 
-    private static Config configureHazelcast() {
-        Config hc = Config.loadDefault();
-
-        // Reduce discovery to localhost
-        hc.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
-        hc.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(true).addMember("localhost");
-
+    private static void submitMapConfigs(HazelcastInstance instance) {
         // Set read-through backend for Roster-Player mapping cache
         MapStoreConfig rosterPlayerCacheConfig = new MapStoreConfig();
-        rosterPlayerCacheConfig.setImplementation(new RosterMapLoader())
-            .setInitialLoadMode(MapStoreConfig.InitialLoadMode.EAGER);
-
-        hc.getMapConfig(Constants.ROSTER_CACHE).setMapStoreConfig(rosterPlayerCacheConfig);
+        rosterPlayerCacheConfig.setClassName(RosterMapLoader.class.getName())
+                .setInitialLoadMode(EAGER)
+                .setEnabled(true);
+        MapConfig rosterCacheConfig = new MapConfig(Constants.ROSTER_CACHE);
+        rosterCacheConfig.setMapStoreConfig(rosterPlayerCacheConfig);
+        instance.getConfig().addMapConfig(rosterCacheConfig);
 
         // Set read-through backend for Roster-Player mapping cache
         MapStoreConfig playerDetailsCacheConfig = new MapStoreConfig();
-        playerDetailsCacheConfig.setImplementation(new PlayerMapLoader())
-                      .setInitialLoadMode(MapStoreConfig.InitialLoadMode.EAGER);
-
-        hc.getMapConfig(Constants.PLAYER_CACHE).setMapStoreConfig(playerDetailsCacheConfig);
-
-        hc.getJetConfig().setEnabled(true);
-
-        return hc;
+        playerDetailsCacheConfig.setClassName(PlayerMapLoader.class.getName())
+                .setInitialLoadMode(EAGER)
+                .setEnabled(true);
+        MapConfig playerCacheConfig = new MapConfig(Constants.PLAYER_CACHE);
+        playerCacheConfig.setMapStoreConfig(playerDetailsCacheConfig);
+        instance.getConfig().addMapConfig(playerCacheConfig);
     }
 
     private static void preloadLookupCaches(HazelcastInstance hz) {
