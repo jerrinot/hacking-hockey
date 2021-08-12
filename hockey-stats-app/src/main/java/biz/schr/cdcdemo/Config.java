@@ -13,7 +13,7 @@ public class Config {
     public static final String dbName = "ahlcz5";
     public static final String dbIP = "3.69.177.18";
     public static final int dbPort = 3306;
-    public static final String dbURL = "jdbc:mysql://" + dbIP + ":" + dbPort + "/" + dbName;
+    public static final String dbURL = "jdbc:mysql://" + dbIP + ":" + dbPort + "/" + dbName + "?serverTimezone=UTC";
 
     public static final boolean USE_CLOUD = true;
 
