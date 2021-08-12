@@ -19,7 +19,7 @@ public class Starter {
     public static void main(String[] args) {
 
         // Start Jet cluster member
-        HazelcastInstance hz = HazelcastClient.newHazelcastClient();
+        HazelcastInstance hz = HazelcastClient.newHazelcastClient(Config.newClientConfig());
         submitMapConfigs(hz);
 
         // Trigger loaders to eagerly populate lookup tables from the database

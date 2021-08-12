@@ -11,12 +11,10 @@ import java.util.List;
 public class Client {
 
     public static void main(String[] args) {
-
-        JetService jet = HazelcastClient.newHazelcastClient().getJet();
+        JetService jet = HazelcastClient.newHazelcastClient(Config.newClientConfig()).getJet();
 
         Observable<List<Player>> observable = jet.getObservable(Constants.TOP_SCORERS_OBSERVABLE);
         observable.addObserver(System.out::println);
-
     }
 
 }
