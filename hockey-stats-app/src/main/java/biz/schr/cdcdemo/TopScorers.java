@@ -3,6 +3,7 @@ package biz.schr.cdcdemo;
 import biz.schr.cdcdemo.dto.Player;
 import biz.schr.cdcdemo.util.Constants;
 import biz.schr.cdcdemo.util.TopNUnique;
+import com.hazelcast.core.HazelcastJsonValue;
 import com.hazelcast.function.ComparatorEx;
 import com.hazelcast.jet.aggregate.AggregateOperations;
 import com.hazelcast.jet.cdc.ChangeRecord;
@@ -10,6 +11,7 @@ import com.hazelcast.jet.cdc.Operation;
 import com.hazelcast.jet.cdc.mysql.MySqlCdcSources;
 import com.hazelcast.jet.config.JobConfig;
 import com.hazelcast.jet.config.ProcessingGuarantee;
+import com.hazelcast.jet.json.JsonUtil;
 import com.hazelcast.jet.pipeline.Pipeline;
 import com.hazelcast.jet.pipeline.ServiceFactories;
 import com.hazelcast.jet.pipeline.Sink;
@@ -80,11 +82,18 @@ public class TopScorers {
         updatedGoals.writeTo(updatePlayerCache());
 
         // Update top scorer ranking and push changes to subscribers
-        updatedGoals
-         .rollingAggregate(TopNUnique.topNUnique(RANKING_TABLE_SIZE, ComparatorEx.comparingLong(Map.Entry::getValue)))
-         .apply(TopScorers::sendUpdatesOnlyForChanges)
-         .apply(TopScorers::lookupPlayers)
-         .writeTo(Sinks.observable(Constants.TOP_SCORERS_OBSERVABLE));
+        StreamStage<List<Player>> top5 = updatedGoals
+                .rollingAggregate(TopNUnique.topNUnique(RANKING_TABLE_SIZE, ComparatorEx.comparingLong(Map.Entry::getValue)))
+                .apply(TopScorers::sendUpdatesOnlyForChanges).apply(TopScorers::lookupPlayers);
+
+        top5
+                .map( l -> new HazelcastJsonValue(JsonUtil.toJson(l)))
+                .writeTo(Sinks.observable(Constants.TOP_SCORERS_OBSERVABLE));
+
+        top5
+                .map( l -> new HazelcastJsonValue(JsonUtil.toJson(l)))
+                .writeTo(Sinks.map(Constants.TOP_SCORERS_MAP, l -> 1L, l -> l));
+
         return p;
     }
 
