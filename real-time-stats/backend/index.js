@@ -63,7 +63,11 @@ function originIsAllowed(origin) {
 
         });
 
-        client = await Client.newHazelcastClient();
+        client = await Client.newHazelcastClient({
+            network: {
+                clusterMembers: ['output-generator:5701']
+            }
+        });
         const map = await client.getMap('top_5_map');
 
         await map.addEntryListener({
