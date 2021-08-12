@@ -1,0 +1,17 @@
+version: "3"
+services:
+  backend:
+    build: backend
+    networks:
+      - hockey-real-time-stats-network
+  frontend:
+    build: frontend
+    networks:
+      - hockey-real-time-stats-network
+    ports:
+      - "127.0.0.1:8080:8080"
+
+
+networks:
+  hockey-real-time-stats-network:
+
