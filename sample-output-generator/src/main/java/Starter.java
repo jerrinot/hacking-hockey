@@ -10,9 +10,9 @@ import com.hazelcast.map.listener.EntryUpdatedListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toMap;
 
@@ -22,9 +22,12 @@ public class Starter {
     public static final String TOP_SCORERS_OBSERVABLE = "top_5_observable";
     public static final String TOP_SCORERS_MAP = "top_5_map";
 
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
     public static void main(String[] args) {
 
         try {
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
             Config cnf = Config.loadDefault();
             cnf.getJetConfig().setEnabled(true);
@@ -68,7 +71,7 @@ public class Starter {
         @Override
         public void entryUpdated(EntryEvent<Long, HazelcastJsonValue> event) {
 
-            System.out.println("Entry Updated:" + event.getValue() + ", type: " + event.getValue().getClass().getName());
+            System.out.println(dateFormat.format(new Date()) + " Entry Updated:" + event.getValue() + ", type: " + event.getValue().getClass().getName());
         }
     }
 }

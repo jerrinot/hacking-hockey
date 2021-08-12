@@ -8,4 +8,4 @@ WORKDIR /app
 
 RUN npm i
 
-ENTRYPOINT ["npm", "start-dev"]
+ENTRYPOINT ["npm", "start"]

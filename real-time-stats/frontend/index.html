@@ -34,21 +34,25 @@
             <b-tabs content-class="mt-3">
                 <b-tab title="Top Scorers" active>
                     <b-table
-                            :sort-by.sync="topScorers.sortBy"
-                            :sort-desc.sync="topScorers.sortDesc"
-                            :fields="topScorers.fields"
-                            :items="topScorers.values"
+                            :sort-by.sync="top5.sortBy"
+                            :sort-desc.sync="top5.sortDesc"
+                            :fields="top5.fields"
+                            :items="top5.values"
                             striped
                             hover
                             label-sort-asc=''
                             label-sort-desc=''
+                            label-sort-clear=''
                     >
                         <template #cell(player)="row">
                             <p>
-                                <b-icon-arrow-down-square v-if="calculateChange(row.item.player, row.item.goal) === 'down'"></b-icon-arrow-down-square>
-                                <b-icon-arrow-up-square v-if="calculateChange(row.item.player, row.item.goal) === 'up'"></b-icon-arrow-up-square>
-                                <b-icon-arrow-right-square v-if="calculateChange(row.item.player, row.item.goal) === 'same'"></b-icon-arrow-right-square>
-                                 {{row.item.player}}
+                                <b-icon-arrow-down-square
+                                        variant="danger"
+                                        v-if="calculateChange(row.item) === 'down'"></b-icon-arrow-down-square>
+                                <b-icon-arrow-up-square
+                                        variant="success"
+                                        v-if="calculateChange(row.item) === 'up'"></b-icon-arrow-up-square>
+                                {{ row.item.player }}
                             </p>
                         </template>
                     </b-table>
@@ -59,53 +63,119 @@
 </div>
 
 <script>
-    new Vue({
+    const app = new Vue({
         el: '#app',
         data: {
-            receivedInitialData: false,
-            topScorers: {
-                fields: [{ key: 'player', sortable: true }, { key: 'goal', sortable: true }],
-                sortDesc: true,
-                sortBy: 'goal',
-                values: [
-                    {
-                        player: 'AA', goal: 1
-                    }, {
-                        player: 'AB', goal: 52
-                    }, {
-                        player: 'C', goal: 333
-                    }
-                ]
+            top5: {
+                fields: [{ key: 'player', sortable: false }, { key: 'goal', sortable: false }],
+                values: []
             },
             // player to goal number to compute the change
-            lastTopScorers: {
-            }
+            lastTop5: [],
+            // holds data receive count
+            receiveCount: 0
         },
         methods: {
-            // returns up, if a player went up, 'down' if went down, '' initially,  'same' if it is same
-            calculateChange(player, goal){
-                if(!this.receivedInitialData) return '';
+            // returns up, if a player went up in the rankings, 'down' if he/she went down, '' otherwise
+            calculateChange(row) {
+                // did not receive 2 times, the difference calculation is meaningless
+                if (this.receiveCount < 2) return '';
 
-                var oldGoal = this.lastTopScorers[player];
-                
-                // new player, return up
-                if(!oldGoal) return 'up';
-                
-                console.log(oldGoal, goal)
-                
-                if(oldGoal === goal){
-                    return 'same';
-                } else if(oldGoal > goal){
-                    return 'down';
-                } else if (oldGoal < goal){
-                    return 'up';
-                } else {
-                    // should not be here but if so return '' for no-op
+                let oldRank = -1;
+                let newRank = -1;
+
+                this.lastTop5.forEach((x, i) => {
+                    if(x.playerId === row.playerId){
+                        oldRank = i;
+                    }
+                });
+
+                this.top5.values.forEach((x, i) => {
+                    if(x.playerId === row.playerId){
+                        newRank = i;
+                    }
+                });
+
+
+                // console.log(oldRank, newRank);
+
+                if (oldRank === -1 && newRank === -1) {
                     return '';
+                } else if (oldRank === -1 && newRank !== -1) {
+                    return 'up';
+                } else if (oldRank !== -1 && newRank === -1) {
+                    return 'down';
+                } else if (oldRank !== -1 && newRank !== -1) {
+                    if (oldRank > newRank) {
+                        return 'up';
+                    } else if (newRank > oldRank) {
+                        return 'down';
+                    } else {
+                        return '';
+                    }
                 }
+            },
+            updateTop5(data) {
+                if (!Array.isArray(data)) {
+                    console.log('Top5 data should be an array');
+                    return;
+                }
+
+                const top5Data = new Array(data.length);
+
+                // gather data in top5Data as array
+                for (let i = 0; i < data.length; i++) {
+                    let d = data[i];
+                    top5Data[i] = {
+                        player: d.firstName + ' ' + d.lastName,
+                        goal: d.goals,
+                        playerId: d.playerId
+                    }
+                }
+
+                top5Data.sort((a, b) => {
+                    if(a.goal === b.goal){
+                        if (a.player > b.player) {
+                            return 1;
+                        } else if (a.player < b.player){
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                    return b.goal - a.goal;
+                });
+
+                this.lastTop5 = this.top5.values;
+
+                this.receiveCount++;
+                this.top5.values = top5Data;
             }
         }
     });
+
+    const websocketURL = 'ws://localhost:3000';
+
+    const socket = new WebSocket(websocketURL, 'stats-protocol');
+
+    // Connection opened
+    socket.addEventListener('open', function (event) {
+        console.log('Connection opened.');
+    });
+
+    // Listen for messages
+    socket.addEventListener('message', function (event) {
+        // console.log(new Date().toISOString(), 'Message from server ', event.data);
+        try {
+            const data = JSON.parse(event.data);
+            if (data.statName === 'top5') {
+                app.updateTop5(data.value);
+            }
+        } catch (e) {
+            console.log('Error parsing data from server' + e);
+        }
+    });
+
 </script>
 </body>
 </html>
