@@ -22,12 +22,12 @@
             display: flex;
             justify-content: center;
         }
-        
+
 
         #topScorers {
             font-family: Arial, Helvetica, sans-serif;
             border-collapse: collapse;
-            width: 100%;
+            width: 50%;
         }
 
         #topScorers td, #topScorers th {
@@ -43,7 +43,7 @@
             padding-top: 12px;
             padding-bottom: 12px;
             text-align: left;
-            background-color: #04AA6D;
+            background-color: #D62431;
             color: white;
         }
 
@@ -53,22 +53,17 @@
 <body>
 
 <div id="app">
-    <div>
-        <div style="text-align: center;">
-            <p style="font-size: 2em;">Real time stats</p>
-        </div>
-        <div class="tableContainer">
-            <table id="topScorers">
-                <tr>
-                    <th>Player</th>
-                    <th>Goal</th>
-                  </tr>
-                <tr v-for="value in top5.values">
-                    <td>{{value.player}}</td>
-                    <td>{{value.goal}}</td>
-                </tr>
-            </table>
-        </div>
+    <div class="tableContainer">
+        <table id="topScorers">
+            <tr>
+                <th>Player</th>
+                <th>Goal</th>
+              </tr>
+            <tr v-bind:style="{ fontWeight: getFontWeight(index) }" v-for="(value, index) in top5">
+                <td>{{value.player}}</td>
+                <td>{{value.goal}}</td>
+            </tr>
+        </table>
     </div>
 </div>
 
@@ -76,60 +71,32 @@
     const app = new Vue({
         el: '#app',
         data: {
-            top5: {
-                values: []
-            },
+            top5: [],
             // player to goal number to compute the change
             lastTop5: [],
             // holds data receive count
-            receiveCount: 0
+            receiveCount: 0,
+            boldClearTimeout: null,
+            clearBolds: false,
+            boldClearInterval: 1000
         },
         methods: {
-            // returns up, if a player went up in the rankings, 'down' if he/she went down, '' otherwise
-            calculateChange(row) {
-                // did not receive 2 times, the difference calculation is meaningless
-                if (this.receiveCount < 2) return '';
-
-                let oldRank = -1;
-                let newRank = -1;
-
-                this.lastTop5.forEach((x, i) => {
-                    if(x.playerId === row.playerId){
-                        oldRank = i;
-                    }
-                });
-
-                this.top5.values.forEach((x, i) => {
-                    if(x.playerId === row.playerId){
-                        newRank = i;
-                    }
-                });
-
-
-                // console.log(oldRank, newRank);
-
-                if (oldRank === -1 && newRank === -1) {
-                    return '';
-                } else if (oldRank === -1 && newRank !== -1) {
-                    return 'up';
-                } else if (oldRank !== -1 && newRank === -1) {
-                    return 'down';
-                } else if (oldRank !== -1 && newRank !== -1) {
-                    if (oldRank > newRank) {
-                        return 'up';
-                    } else if (newRank > oldRank) {
-                        return 'down';
-                    } else {
-                        return '';
-                    }
+            // return bold if changed, normal otherwise
+            getFontWeight: function (index){
+                if(this.clearBolds) return 'normal';
+                if(this.receiveCount < 2) return 'normal';
+                const value = this.top5[index];
+                const lastValue = this.lastTop5[index];
+                if(value.player === lastValue.player && value.goal === lastValue.goal && value.playerId === lastValue.playerId){
+                    return 'normal';
+                } else {
+                    return 'bold';
                 }
             },
             updateTop5(data) {
-                if (!Array.isArray(data)) {
-                    console.log('Top5 data should be an array');
-                    return;
+                if(this.boldClearTimeout){
+                    clearTimeout(this.boldClearTimeout);
                 }
-
                 const top5Data = new Array(data.length);
 
                 // gather data in top5Data as array
@@ -158,10 +125,15 @@
                     return b.goal - a.goal;
                 });
 
-                this.lastTop5 = this.top5.values;
+                this.lastTop5 = this.top5;
 
                 this.receiveCount++;
-                this.top5.values = top5Data;
+                this.top5 = top5Data;
+                this.clearBolds = false;
+                this.boldClearTimeout = setTimeout(() => {
+                    this.clearBolds = true;
+                    this.boldClearTimeout = null;
+                }, this.boldClearInterval);
             }
         }
     });
