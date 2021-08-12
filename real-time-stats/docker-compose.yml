@@ -2,8 +2,10 @@ version: "3"
 services:
   backend:
     build: backend
-    networks:
-      - hockey-real-time-stats-network
+#    networks:
+#      - hockey-real-time-stats-network
+    ports:
+      - "3000:3000"
     volumes:
       - ./backend/index.js:/app/index.js
       - ./backend/package.json:/app/package.json
@@ -20,6 +22,6 @@ services:
 #      - ./frontend/package-lock.json:/app/package-lock.json
 
 
-networks:
-  hockey-real-time-stats-network:
+#networks:
+#  hockey-real-time-stats-network:
 
