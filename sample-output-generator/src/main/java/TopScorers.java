@@ -1,5 +1,5 @@
+import com.hazelcast.core.HazelcastJsonValue;
 import com.hazelcast.function.ComparatorEx;
-import com.hazelcast.function.FunctionEx;
 import com.hazelcast.jet.aggregate.AggregateOperations;
 import com.hazelcast.jet.config.JobConfig;
 import com.hazelcast.jet.config.ProcessingGuarantee;
@@ -50,11 +50,11 @@ public class TopScorers {
                 .apply(TopScorers::sendUpdatesOnlyForChanges).apply(TopScorers::lookupPlayers);
 
         top5
-            .map( l -> JsonUtil.hazelcastJsonValue(l))
+            .map( l -> new HazelcastJsonValue(JsonUtil.toJson(l)))
             .writeTo(Sinks.observable(Starter.TOP_SCORERS_OBSERVABLE));
 
         top5
-              .map( l -> JsonUtil.hazelcastJsonValue(l))
+              .map( l -> new HazelcastJsonValue(JsonUtil.toJson(l)))
               .writeTo(Sinks.map(Starter.TOP_SCORERS_MAP, l -> 1L, l -> l));
 
         return p;
