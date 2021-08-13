@@ -4,7 +4,7 @@ RUN apk add npm nodejs
 
 RUN mkdir /app
 
-COPY index.html package.json /app/
+COPY cluster2/index.html package.json /app/
 
 WORKDIR /app
 

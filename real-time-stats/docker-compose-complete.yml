@@ -1,0 +1,16 @@
+version: "3"
+services:
+  frontend:
+    build: frontend
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/package-lock.json:/app/package-lock.json
+  backend:
+    build: backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/index.js:/app/index.js

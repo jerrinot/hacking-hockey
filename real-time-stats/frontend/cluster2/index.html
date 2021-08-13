@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Real time stats</title>
+
+    <!-- Load polyfills to support older browsers -->
+    <script src="//polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver"
+            crossorigin="anonymous"></script>
+
+    <!-- Load Vue followed by BootstrapVue -->
+    <script src="//unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+
+    <!-- Load the following for BootstrapVueIcons support -->
+    <script src="//unpkg.com/bootstrap-vue@2.21.2/dist/bootstrap-vue-icons.min.js"></script>
+
+    <style>
+        .tableContainer {
+            display: flex;
+            justify-content: center;
+        }
+
+
+        #topScorers {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 50%;
+        }
+
+        #topScorers td, #topScorers th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #topScorers td {
+            font-size: 14px;
+        }
+
+        #topScorers th {
+            font-size: 18px;
+        }
+
+        #topScorers tr:nth-child(even){background-color: #f2f2f2;}
+
+        #topScorers tr:hover {background-color: #ddd;}
+
+        #topScorers th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #D62431;
+            color: white;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div id="app">
+    <div class="tableContainer">
+        <table id="topScorers">
+            <tr>
+                <th>Player</th>
+                <th>Goal</th>
+              </tr>
+            <tr v-bind:style="{ fontWeight: getFontWeight(index) }" v-for="(value, index) in top5">
+                <td>{{value.player}}</td>
+                <td>{{value.goal}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    const app = new Vue({
+        el: '#app',
+        data: {
+            top5: [],
+            // player to goal number to compute the change
+            lastTop5: [],
+            // holds data receive count
+            receiveCount: 0,
+            boldClearTimeout: null,
+            clearBolds: false,
+            boldClearInterval: 1000
+        },
+        methods: {
+            // return bold if changed, normal otherwise
+            getFontWeight: function (index){
+                if(this.clearBolds) return 'normal';
+                if(this.receiveCount < 2) return 'normal';
+                const value = this.top5[index];
+                const lastValue = this.lastTop5[index];
+                if(value.player === lastValue.player && value.goal === lastValue.goal && value.playerId === lastValue.playerId){
+                    return 'normal';
+                } else {
+                    return 'bold';
+                }
+            },
+            updateTop5(data) {
+                if(this.boldClearTimeout){
+                    clearTimeout(this.boldClearTimeout);
+                }
+                const top5Data = new Array(data.length);
+
+                // gather data in top5Data as array
+                for (let i = 0; i < data.length; i++) {
+                    let d = data[i];
+                    top5Data[i] = {
+                        player: d.firstName + ' ' + d.lastName,
+                        goal: d.goals,
+                        playerId: d.playerId
+                    }
+                }
+
+                top5Data.sort((a, b) => {
+                    if(a.goal === b.goal){
+                        const upperA = a.player.toUpperCase();
+                        const upperB = b.player.toUpperCase();
+
+                        if (upperA > upperB) {
+                            return 1;
+                        } else if (upperA < upperB){
+                            return -1;
+                        } else {
+                            return 0;
+                        }
+                    }
+                    return b.goal - a.goal;
+                });
+
+                this.lastTop5 = this.top5;
+
+                this.receiveCount++;
+                this.top5 = top5Data;
+                this.clearBolds = false;
+                this.boldClearTimeout = setTimeout(() => {
+                    this.clearBolds = true;
+                    this.boldClearTimeout = null;
+                }, this.boldClearInterval);
+            }
+        }
+    });
+
+    const websocketURL = 'ws://3.69.177.18:3000/';
+
+    const socket = new WebSocket(websocketURL, 'stats-protocol');
+
+    // Connection opened
+    socket.addEventListener('open', function (event) {
+        console.log('Connection opened.');
+    });
+
+    // Listen for messages
+    socket.addEventListener('message', function (event) {
+        // console.log(new Date().toISOString(), 'Message from server ', event.data);
+        try {
+            const data = JSON.parse(event.data);
+            if (data.statName === 'top5') {
+                app.updateTop5(data.value);
+            }
+        } catch (e) {
+            console.log('Error parsing data from server' + e);
+        }
+    });
+
+</script>
+</body>
+</html>
