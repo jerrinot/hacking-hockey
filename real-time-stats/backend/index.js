@@ -8,6 +8,10 @@ function originIsAllowed(origin) {
     return origin === 'http://3.69.177.18:8080' || origin ===  'http://localhost:8080';
 }
 
+async function sendToConnection(connection, data){
+    connection.send(data);
+}
+
 (async () => {
     let client;
     let connections = new Set();
@@ -76,18 +80,24 @@ function originIsAllowed(origin) {
         const map = await client.getMap('top_5_map');
 
         await map.addEntryListener({
-            added: (entryEvent) => {
+            added: async (entryEvent) => {
                 top5Cache = {statName: "top5", value: entryEvent.value};
+
+                const jobs = [];
                 for (const connection of connections) {
-                    connection.send(JSON.stringify(top5Cache));
+                    jobs.push(sendToConnection(connection, JSON.stringify(top5Cache)));
                 }
+                await Promise.all(jobs);
                 // console.log(entryEvent);
             },
-            updated: (entryEvent) => {
+            updated: async (entryEvent) => {
                 top5Cache = {statName: "top5", value: entryEvent.value};
+
+                const jobs = [];
                 for (const connection of connections) {
-                    connection.send(JSON.stringify(top5Cache));
+                    jobs.push(sendToConnection(connection, JSON.stringify(top5Cache)));
                 }
+                await Promise.all(jobs);
                 // console.log(entryEvent);
             }
         }, undefined, true);
