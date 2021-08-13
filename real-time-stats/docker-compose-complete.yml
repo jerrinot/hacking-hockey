@@ -5,7 +5,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     volumes:
-      - ./frontend/index.html:/app/index.html
+      - ./frontend/cluster2/index.html:/app/index.html
       - ./frontend/package.json:/app/package.json
       - ./frontend/package-lock.json:/app/package-lock.json
   backend:
@@ -14,3 +14,7 @@ services:
       - "3000:3000"
     volumes:
       - ./backend/index.js:/app/index.js
+    environment:
+      HOCKEY_NODE_HZ_CLOUD_CLUSTER_NAME: bu-1102
+      HOCKEY_NODE_HZ_CLOUD_TOKEN: Py7KkFGqgqCZ28b2mbmWUKJG9m3OouWnT0Xndn46MFpezUJBgf
+
