@@ -5,7 +5,7 @@ const http = require('http');
 
 function originIsAllowed(origin) {
     console.log(origin);
-    return origin === 'http://3.69.177.18:8080' || origin ===  'http://localhost:8080';
+    return origin === process.env.NODE_APP_ORIGIN || origin ===  'http://localhost:8080';
 }
 
 async function sendToConnection(connection, data){

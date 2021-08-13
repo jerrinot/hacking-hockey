@@ -7,5 +7,6 @@ services:
     volumes:
       - ./backend/index.js:/app/index.js
     environment:
+      NODE_APP_ORIGIN: http://3.69.177.18:8080
       HOCKEY_NODE_HZ_CLOUD_CLUSTER_NAME: bu-1103
       HOCKEY_NODE_HZ_CLOUD_TOKEN: JYvLyGndxG1Gr3bCZareqYXDn01V2S1PMZNJx0bVWm2ykPwEWi
