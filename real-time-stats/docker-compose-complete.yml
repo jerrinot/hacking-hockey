@@ -16,6 +16,8 @@ services:
       - ./backend/index.js:/app/index.js
     environment:
       NODE_APP_ORIGIN: http://54.177.124.183:8080
-      HOCKEY_NODE_HZ_CLOUD_CLUSTER_NAME: bu-1102
-      HOCKEY_NODE_HZ_CLOUD_TOKEN: Py7KkFGqgqCZ28b2mbmWUKJG9m3OouWnT0Xndn46MFpezUJBgf
+      HOCKEY_NODE_HZ_CLOUD_CLUSTER_NAME: bu-1104
+      HOCKEY_NODE_HZ_CLOUD_TOKEN: 8VoxSbfRYALH28Ma9mwXNFiTGeVTQOOHDVR7rDcpwr2p6dOFhX
+
+
 
