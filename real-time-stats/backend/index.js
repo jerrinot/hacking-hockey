@@ -55,6 +55,7 @@ async function sendToConnection(connection, data){
                 connections.add(connection);
                 console.log(connections.size);
                 // send cached data if there is
+                console.log(top5Cache);
                 if(top5Cache) connection.send(JSON.stringify(top5Cache));
 
                 connection.on('close', function (reasonCode, description) {
@@ -79,7 +80,8 @@ async function sendToConnection(connection, data){
             }
         });
         const map = await client.getMap('top_5_map');
-        top5Cache = await map.get(long.fromNumber(1));
+        const readOnlyLazyList = await map.values();
+        top5Cache = readOnlyLazyList.get(0);
 
         await map.addEntryListener({
             added: (entryEvent) => {
