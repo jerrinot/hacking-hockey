@@ -2,7 +2,6 @@
 const { Client } = require('hazelcast-client');
 const WebSocketServer = require('websocket').server;
 const http = require('http');
-const long = require('long');
 
 function originIsAllowed(origin) {
     console.log(origin);
@@ -55,7 +54,7 @@ async function sendToConnection(connection, data){
                 connections.add(connection);
                 console.log(connections.size);
                 // send cached data if there is
-                console.log(top5Cache);
+                // console.log(top5Cache);
                 if(top5Cache) connection.send(JSON.stringify(top5Cache));
 
                 connection.on('close', function (reasonCode, description) {
