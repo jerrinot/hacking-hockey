@@ -2,6 +2,7 @@
 const { Client } = require('hazelcast-client');
 const WebSocketServer = require('websocket').server;
 const http = require('http');
+const long = require('long');
 
 function originIsAllowed(origin) {
     console.log(origin);
@@ -78,6 +79,7 @@ async function sendToConnection(connection, data){
             }
         });
         const map = await client.getMap('top_5_map');
+        top5Cache = await map.get(long.fromNumber(1));
 
         await map.addEntryListener({
             added: (entryEvent) => {
