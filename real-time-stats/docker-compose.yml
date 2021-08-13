@@ -6,3 +6,6 @@ services:
       - "3000:3000"
     volumes:
       - ./backend/index.js:/app/index.js
+    environment:
+      HOCKEY_NODE_HZ_CLOUD_CLUSTER_NAME: bu-1103
+      HOCKEY_NODE_HZ_CLOUD_TOKEN: JYvLyGndxG1Gr3bCZareqYXDn01V2S1PMZNJx0bVWm2ykPwEWi

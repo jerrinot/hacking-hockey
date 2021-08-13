@@ -63,10 +63,10 @@ function originIsAllowed(origin) {
         });
 
         client = await Client.newHazelcastClient({
-            clusterName: 'bu-1077',
+            clusterName: process.env.HOCKEY_NODE_HZ_CLOUD_CLUSTER_NAME,
             network: {
                 hazelcastCloud: {
-                    discoveryToken: '3bg2qLtBtlbGuGE5RRwjZYi62W9fg9C7rdfG6nFWE1UMPSrqoP'
+                    discoveryToken: process.env.HOCKEY_NODE_HZ_CLOUD_TOKEN
                 }
             },
             properties: {
