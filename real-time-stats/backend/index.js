@@ -81,7 +81,7 @@ async function sendToConnection(connection, data){
         });
         const map = await client.getMap('top_5_map');
         const readOnlyLazyList = await map.values();
-        top5Cache = readOnlyLazyList.get(0);
+        top5Cache = {statName: "top5", value: readOnlyLazyList.get(0)};
 
         await map.addEntryListener({
             added: (entryEvent) => {
