@@ -1,21 +1,22 @@
 package biz.schr.cdcdemo;
 
-import biz.schr.cdcdemo.dto.Player;
 import biz.schr.cdcdemo.util.Constants;
 import com.hazelcast.client.HazelcastClient;
-import com.hazelcast.core.HazelcastJsonValue;
-import com.hazelcast.jet.JetService;
-import com.hazelcast.jet.Observable;
-
-import java.util.List;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.IMap;
+import com.hazelcast.map.listener.EntryMergedListener;
+import com.hazelcast.map.listener.EntryUpdatedListener;
 
 public class Client {
 
-    public static void main(String[] args) {
-        JetService jet = HazelcastClient.newHazelcastClient(Config.newClientConfig()).getJet();
+    public static void main(String[] args) throws Exception {
+        HazelcastInstance client = HazelcastClient.newHazelcastClient(Config.newClientConfig());
 
-        Observable<HazelcastJsonValue> observable = jet.getObservable(Constants.TOP_SCORERS_OBSERVABLE);
-        observable.addObserver(System.out::println);
+        IMap<Object, Object> map = client.getMap(Constants.TOP_SCORERS_MAP);
+        map.addEntryListener((EntryUpdatedListener<Object, Object>) entryEvent -> System.out.println("Entry updated: " + entryEvent), true);
+        map.addEntryListener((EntryMergedListener<Object, Object>) entryEvent -> System.out.println("Entry merged: " + entryEvent), true);
+        System.out.println(map.values());
+        Thread.sleep(Long.MAX_VALUE);
     }
 
 }
