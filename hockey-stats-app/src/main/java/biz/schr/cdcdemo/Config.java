@@ -21,9 +21,20 @@ public class Config {
         if (USE_CLOUD) {
             ClientConfig config = new ClientConfig();
             config.setProperty(STATISTICS_ENABLED.getName(), "true");
-            config.setProperty(HAZELCAST_CLOUD_DISCOVERY_TOKEN.getName(), "3bg2qLtBtlbGuGE5RRwjZYi62W9fg9C7rdfG6nFWE1UMPSrqoP");
             config.setProperty("hazelcast.client.cloud.url", "https://bumblebee.test.hazelcast.cloud");
-            config.setClusterName("bu-1077");
+
+            // aws-hockey cluster
+//            config.setProperty(HAZELCAST_CLOUD_DISCOVERY_TOKEN.getName(), "ytvNd1p4WpvTVFsmxGvAgEtOXfU6g7PxwDhKLZ9g7bv6FzP76Q");
+//            config.setClusterName("bu-1084");
+
+            // aws-hockey-california
+//            config.setProperty(HAZELCAST_CLOUD_DISCOVERY_TOKEN.getName(), "Py7KkFGqgqCZ28b2mbmWUKJG9m3OouWnT0Xndn46MFpezUJBgf");
+//            config.setClusterName("bu-1102");
+
+            // aws-hockey-london
+            config.setProperty(HAZELCAST_CLOUD_DISCOVERY_TOKEN.getName(), "JYvLyGndxG1Gr3bCZareqYXDn01V2S1PMZNJx0bVWm2ykPwEWi");
+            config.setClusterName("bu-1103");
+
             return config;
         } else {
             return new ClientConfig();
