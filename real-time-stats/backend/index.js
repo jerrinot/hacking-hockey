@@ -80,24 +80,34 @@ async function sendToConnection(connection, data){
         const map = await client.getMap('top_5_map');
 
         await map.addEntryListener({
-            added: async (entryEvent) => {
+            added: (entryEvent) => {
                 top5Cache = {statName: "top5", value: entryEvent.value};
 
                 const jobs = [];
                 for (const connection of connections) {
                     jobs.push(sendToConnection(connection, JSON.stringify(top5Cache)));
                 }
-                await Promise.all(jobs);
+                Promise.all(jobs);
                 // console.log(entryEvent);
             },
-            updated: async (entryEvent) => {
+            updated: (entryEvent) => {
                 top5Cache = {statName: "top5", value: entryEvent.value};
 
                 const jobs = [];
                 for (const connection of connections) {
                     jobs.push(sendToConnection(connection, JSON.stringify(top5Cache)));
                 }
-                await Promise.all(jobs);
+                Promise.all(jobs);
+                // console.log(entryEvent);
+            },
+            merged: (entryEvent) => {
+                top5Cache = {statName: "top5", value: entryEvent.value};
+
+                const jobs = [];
+                for (const connection of connections) {
+                    jobs.push(sendToConnection(connection, JSON.stringify(top5Cache)));
+                }
+                Promise.all(jobs);
                 // console.log(entryEvent);
             }
         }, undefined, true);
